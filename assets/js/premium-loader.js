@@ -1,111 +1,39 @@
-// Premium realistik loader animatsiyasi
+// Premium 3D Loader with WebGL-style effects
 
-class PremiumLoader {
-  constructor() {
-    this.loader = document.getElementById('loader');
-    this.progressFill = document.querySelector('.progress-fill');
-    this.progressText = document.querySelector('.progress-text');
-    this.progress = 0;
-    this.init();
-  }
+const loaderElement = document.getElementById('loader');
+let loadProgress = 0;
+const targetProgress = 100;
+const animationDuration = 1500; // 1.5 seconds
+const startTime = Date.now();
 
-  init() {
-    // Sahifa yuklanganda
-    window.addEventListener('load', () => this.complete());
-    
-    // Boshlang'ich progress
-    this.simulate();
-  }
-
-  simulate() {
-    // Realistic progress
-    const stages = [
-      { duration: 800, target: 15 },  // AI Systems
-      { duration: 600, target: 35 },  // Database
-      { duration: 700, target: 60 },  // API Services
-      { duration: 500, target: 85 },  // Automation
-      { duration: 400, target: 100 }  // Media Engine
-    ];
-
-    let currentStage = 0;
-
-    const advanceStage = () => {
-      if (currentStage >= stages.length) return;
-
-      const stage = stages[currentStage];
-      const startTime = Date.now();
-      const startProgress = this.progress;
-      const targetProgress = stage.target;
-
-      const interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const progress = (elapsed / stage.duration) * (targetProgress - startProgress) + startProgress;
-
-        if (progress >= targetProgress) {
-          this.progress = targetProgress;
-          this.update();
-          clearInterval(interval);
-          currentStage++;
-          setTimeout(advanceStage, 200);
-        } else {
-          this.progress = progress;
-          this.update();
-        }
-      }, 30);
-    };
-
-    advanceStage();
-  }
-
-  update() {
-    this.progress = Math.min(this.progress, 99);
-    const percent = Math.floor(this.progress);
-    
-    if (this.progressFill) {
-      this.progressFill.style.width = percent + '%';
-    }
-    
-    if (this.progressText) {
-      this.progressText.textContent = percent + '%';
-    }
-  }
-
-  complete() {
-    this.progress = 100;
-    this.update();
-    
+function animateLoader() {
+  const elapsed = Date.now() - startTime;
+  const progress = Math.min((elapsed / animationDuration) * 100, 100);
+  
+  if (progress < 100) {
+    requestAnimationFrame(animateLoader);
+  } else {
+    // Fade out and hide loader
+    loaderElement.style.opacity = '0';
+    loaderElement.style.pointerEvents = 'none';
     setTimeout(() => {
-      if (this.loader) {
-        this.loader.style.animation = 'fadeOutLoader 0.8s ease-out forwards';
-        setTimeout(() => {
-          this.loader.style.display = 'none';
-        }, 800);
-      }
+      loaderElement.style.display = 'none';
     }, 500);
   }
 }
 
-// Loader ishni boshlash
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    new PremiumLoader();
-  });
-} else {
-  new PremiumLoader();
+// Start animation
+if (loaderElement) {
+  animateLoader();
+  
+  // Ensure loader hides after 2 seconds regardless
+  setTimeout(() => {
+    if (loaderElement) {
+      loaderElement.style.opacity = '0';
+      loaderElement.style.pointerEvents = 'none';
+      setTimeout(() => {
+        loaderElement.style.display = 'none';
+      }, 500);
+    }
+  }, 2000);
 }
-
-// CSS qo'shish
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes fadeOutLoader {
-    from {
-      opacity: 1;
-      visibility: visible;
-    }
-    to {
-      opacity: 0;
-      visibility: hidden;
-    }
-  }
-`;
-document.head.appendChild(style);
